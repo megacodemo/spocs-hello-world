@@ -34,15 +34,17 @@
   padding: 0;
 }
 
+html, body { height: 100%; }
+
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: #2d2d2d;
   background: #f7f8fa;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;   /* prevents whole-page scroll; inner sections scroll on their own */
 }
 
 h1 { font-size: 2rem;   margin-bottom: 0.5rem; }
@@ -77,9 +79,6 @@ nav {
   justify-content: space-between;
   padding: 0 2rem;
   height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .nav-title {
@@ -107,8 +106,11 @@ nav {
 
 .home-container {
   max-width: 900px;
-  margin: 3rem auto;
-  padding: 0 1.5rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  flex: 1;             /* fills space between nav and footer */
+  overflow-y: auto;    /* scrolls if the bio is long, since body no longer scrolls */
+  width: 100%;
 }
 
 .profile-section {
@@ -185,16 +187,23 @@ nav {
 .resume-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
+  grid-template-rows: minmax(0, 1fr);   /* single row that fills the height without growing past it */
   gap: 0;
-  height: calc(100vh - 56px - 48px);  /* full height minus nav and footer */
+  flex: 1;                              /* fills leftover space between nav and footer */
+  min-height: 0;                        /* required for a flex child that must shrink */
+  overflow: hidden;                     /* clip columns so they scroll internally, not the page */
 }
 
 /* Stack columns on small screens */
 @media (max-width: 768px) {
+  body { overflow: auto; }                /* let the page scroll on mobile */
   .resume-layout {
     grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: auto auto;        /* stacked, natural height */
+    flex: none;
+    overflow: visible;
   }
+  .resume-content, .chat-log { overflow: visible; }
 }
 
 .resume-content {
@@ -298,7 +307,6 @@ nav {
   flex-direction: column;
   border-left: 1px solid #e2e8f0;
   background: white;
-  height: 100%;
 }
 
 .chat-header {
@@ -327,6 +335,7 @@ nav {
 
 .chat-log {
   flex: 1;
+  min-height: 0;     /* prevents flex child from growing past container bounds */
   overflow-y: auto;
   padding: 1rem;
   display: flex;
@@ -354,6 +363,16 @@ nav {
   color: #1e293b;
   align-self: flex-start;
 }
+
+/* Contain markdown content (tables, code, long words) inside the bubble */
+.msg-ai p        { margin: 0.3rem 0; }
+.msg-ai ul,
+.msg-ai ol       { margin: 0.3rem 0; padding-left: 1.2rem; }
+.msg-ai pre,
+.msg-ai code     { white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem; }
+.msg-ai table    { display: block; overflow-x: auto; max-width: 100%; font-size: 0.8rem; }
+.msg-ai th,
+.msg-ai td       { border: 1px solid #cbd5e1; padding: 0.2rem 0.4rem; }
 
 .msg-ai.typing {
   color: #94a3b8;

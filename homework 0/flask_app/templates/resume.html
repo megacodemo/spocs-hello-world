@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-<!--
+{#
   resume.html — displays the resume and an AI chat panel side by side.
 
   HOW THE DATA GETS HERE:
@@ -20,26 +20,31 @@
     The server queries the database for your resume, builds a system prompt,
     calls OpenRouter, and emits 'receive_message' back with the AI's reply.
     See flask_app/utils/socket_events.py for the server-side handler.
--->
+#}
 
 {% block content %}
 
-<!-- Socket.IO client: connects to the server and lets us emit/receive events -->
+{# Socket.IO client: connects to the server and lets us emit/receive events #}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+
+{# marked.js: converts markdown text (e.g. **bold**, lists) into HTML.
+   The AI often replies in markdown, so we render it nicely instead of
+   showing raw asterisks and hashes. #}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <div class="resume-layout">
 
-  <!-- ============================================================
-       LEFT COLUMN: Resume content (rendered from database data)
-       ============================================================ -->
+  {# ============================================================
+     LEFT COLUMN: Resume content (rendered from database data)
+     ============================================================ #}
   <div class="resume-content">
     <h1>Resume</h1>
 
-    <!--
+    {#
       Loop over each institution in the resume dictionary.
       'institution' is one entry — e.g. Michigan State University.
-      resume.values() gives us the institution data dicts (skipping the ID keys).
-    -->
+      resume.items() gives us (id, data) pairs for each institution.
+    #}
     {% for inst_id, institution in resume.items() %}
     <div class="institution">
 
@@ -49,10 +54,10 @@
         {% if institution.city %} · {{ institution.city }}, {{ institution.state }}{% endif %}
       </p>
 
-      <!--
+      {#
         Loop over each position held at this institution.
         e.g. 'Instructor', 'Researcher'
-      -->
+      #}
       {% for pos_id, position in institution.positions.items() %}
       <div class="position">
 
@@ -62,14 +67,14 @@
         </div>
         <p class="responsibilities">{{ position.responsibilities }}</p>
 
-        <!--
+        {#
           Loop over specific projects or achievements within this position.
           e.g. 'CSE 491 — AI Agents'
-        -->
+        #}
         {% for exp_id, experience in position.experiences.items() %}
         <div class="experience">
 
-          <!-- Show the experience name as a link if a hyperlink is provided -->
+          {# Show the experience name as a link if a hyperlink is provided #}
           {% if experience.hyperlink %}
             <a href="{{ experience.hyperlink }}" target="_blank" class="experience-name">
               {{ experience.name }}
@@ -80,7 +85,7 @@
 
           <span class="experience-desc"> — {{ experience.description }}</span>
 
-          <!-- Skills used in this experience -->
+          {# Skills used in this experience #}
           {% if experience.skills %}
           <div class="skills">
             {% for skill_id, skill in experience.skills.items() %}
@@ -93,30 +98,30 @@
           {% endif %}
 
         </div>
-        {% endfor %} {# end experiences loop #}
+        {% endfor %}{# end experiences loop #}
 
       </div>
-      {% endfor %} {# end positions loop #}
+      {% endfor %}{# end positions loop #}
 
     </div>
-    {% endfor %} {# end institutions loop #}
+    {% endfor %}{# end institutions loop #}
 
   </div>
 
-  <!-- ============================================================
-       RIGHT COLUMN: AI Chat Panel
-       ============================================================
-       HOW THIS WORKS:
-         1. User types a message and clicks Send (or presses Enter)
-         2. sendMessage() emits a 'send_message' WebSocket event to Flask
-         3. socket_events.py handles it: queries resume → calls OpenRouter → emits reply
-         4. socket.on('receive_message') fires here and displays the reply
+  {# ============================================================
+     RIGHT COLUMN: AI Chat Panel
 
-       QUESTION: How is this different from a normal HTTP fetch() call?
-         With fetch(), you send one request and get one response, then the
-         connection closes. With WebSockets, the connection stays open —
-         the server can push messages to you at any time.
-  -->
+     HOW THIS WORKS:
+       1. User types a message and clicks Send (or presses Enter)
+       2. sendMessage() emits a 'send_message' WebSocket event to Flask
+       3. socket_events.py handles it: queries resume → calls OpenRouter → emits reply
+       4. socket.on('receive_message') fires here and displays the reply
+
+     QUESTION: How is this different from a normal HTTP fetch() call?
+       With fetch(), you send one request and get one response, then the
+       connection closes. With WebSockets, the connection stays open —
+       the server can push messages to you at any time.
+  #}
   <div class="chat-panel">
 
     <div class="chat-header">
@@ -124,7 +129,7 @@
       <span>AI Resume Assistant</span>
     </div>
 
-    <!-- Messages appear here as the conversation grows -->
+    {# Messages appear here as the conversation grows #}
     <div id="chat-log" class="chat-log">
       <div class="msg-ai">
         Hi! I've read this resume and I'm ready to answer questions about it.
@@ -132,7 +137,7 @@
       </div>
     </div>
 
-    <!-- Input area -->
+    {# Input area #}
     <div class="chat-input-area">
       <textarea
         id="chat-input"
@@ -192,12 +197,18 @@
   // DISPLAY HELPERS
   // ----------------------------------------------------------------
 
-  // Creates a message bubble and scrolls it into view
+  // Creates a message bubble and scrolls it into view.
+  // User messages are shown as plain text; AI messages go through marked.js
+  // so markdown (bold, lists, tables) renders as HTML instead of raw symbols.
   function displayMessage(sender, message_text) {
     const chat_log   = document.getElementById('chat-log');
     const bubble     = document.createElement('div');
     bubble.className = (sender === 'You') ? 'msg-user' : 'msg-ai';
-    bubble.textContent = sender + ': ' + message_text;
+    if (sender === 'You') {
+      bubble.textContent = sender + ': ' + message_text;
+    } else {
+      bubble.innerHTML = '<strong>' + sender + ':</strong> ' + marked.parse(message_text);
+    }
     chat_log.appendChild(bubble);
     chat_log.scrollTop = chat_log.scrollHeight;   // scroll to bottom
   }

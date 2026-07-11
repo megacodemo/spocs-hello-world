@@ -21,10 +21,12 @@ import requests
 # OpenRouter acts as a single gateway to many different AI models.
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Which AI model to use. OpenRouter supports many models — this is a reliable default.
+# Which AI model to use. OpenRouter supports many models.
+# Models with ':free' suffix are free to use — no API credits needed.
 # See all available models at: https://openrouter.ai/models
-# QUESTION: What would change if you switched to 'anthropic/claude-3-haiku'?
-DEFAULT_MODEL = "openai/gpt-3.5-turbo"
+# QUESTION: What would change if you switched to a different model?
+#           Try 'google/gemma-2-9b-it:free' or 'mistralai/mistral-7b-instruct:free'.
+DEFAULT_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
 
 
 def send_message(user_message, system_prompt="You are a helpful assistant."):

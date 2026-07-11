@@ -92,6 +92,8 @@ def build_resume_system_prompt(db):
 You have been given the resume content below. Use it to answer questions
 accurately and helpfully. If asked something not covered in the resume,
 say so honestly rather than guessing.
+Keep answers concise. You may use light markdown (bold, bullet lists) but
+avoid large tables.
 
 RESUME CONTENT:
 {resume_text}
