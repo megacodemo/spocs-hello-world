@@ -118,7 +118,7 @@ Open the `.env` file that was just created and replace the placeholder:
 OPENROUTER_API_KEY=paste-your-key-here
 ```
 
-Your instructor will provide your OpenRouter API key. Keep it private — never
+Create and Account and create your own OpenRouter API key, [link](https://www.openrouter.ai/settings/keys). Keep it private — never
 commit the `.env` file to git (it's already in `.gitignore`, so git will
 ignore it automatically).
 
@@ -232,11 +232,11 @@ answers for Homework 0, but future assignments will build on them:
 
 ## Submitting
 
-When you're ready to submit:
+When you're ready to submit, push your work to your fork:
 
 ```bash
 git add .
-git commit -m "Homework 0 — your-netid"
+git commit -m "Homework 0"
 git push origin main
 ```
 
@@ -245,4 +245,6 @@ Then record a short demo video showing:
 2. Your customized resume page with your own data
 3. A chat interaction where the AI answers a question about your resume
 
-Submit the video using the [course submission form](https://classroom.google.com/c/ODY4NzQ1MjU2NjUx/a/ODcwNTc0MzUzOTI0/details).
+Submit **both** of the following using the [course submission form](https://classroom.google.com/c/ODY4NzQ1MjU2NjUx/a/ODcwNTc0MzUzOTI0/details):
+1. Your demo video
+2. Your fork's GitHub URL (e.g. `https://github.com/YOUR-USERNAME/ai-agents`) so the grader can view your code
